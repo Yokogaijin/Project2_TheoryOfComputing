@@ -13,7 +13,7 @@ class NDTuringMachine:
 
     def trace(self, input_string):
         """Trace the behavior of the NDTM."""
-        configurations = [(self.start_state, input_string, 0)]  # (state, tape, head_position)
+        configurations = [(self.start_state, list(input_string), 0)]  # (state, tape, head_position)
         while configurations:
             next_configurations = []
             for state, tape, head in configurations:
@@ -23,18 +23,26 @@ class NDTuringMachine:
                 if state == self.reject_state:
                     continue
                 
+                # Get the symbol under the head, or use '_' if beyond the tape
                 read_symbol = tape[head] if head < len(tape) else '_'
+                
+                # Check for valid transitions
                 if (state, read_symbol) in self.transitions:
                     for next_state, write_symbol, direction in self.transitions[(state, read_symbol)]:
-                        new_tape = list(tape)
+                        new_tape = tape[:]
+                        
+                        # Update the tape at the head position
                         if head < len(new_tape):
                             new_tape[head] = write_symbol
-                        else:
-                            new_tape.append(write_symbol)
+                        elif head == len(new_tape):
+                            new_tape.append(write_symbol)  # Only append when head is at the end
                         
+                        # Update the head position
                         new_head = head + (1 if direction == 'R' else -1)
                         new_head = max(new_head, 0)  # Prevent negative head position
-                        next_configurations.append((next_state, ''.join(new_tape), new_head))
+                        
+                        # Add the new configuration to the next step
+                        next_configurations.append((next_state, new_tape, new_head))
             
             configurations = next_configurations
         
@@ -76,5 +84,5 @@ csv_file_with_transitions = "a_plus_DTM.csv"
 
 ndtm = load_machine_from_csv_with_transitions(csv_file_with_transitions)
 
-input_string = "aaa"
+input_string = "a"
 ndtm.trace(input_string)
