@@ -11,19 +11,6 @@ class NDTuringMachine:
         self.reject_state = reject_state
         self.transitions = {}  # Transition function (e.g., {('q1', '0'): [('q2', '1', 'R'), ...]})
 
-    def load_transitions(self, transitions_file):
-        """Load transitions from a CSV file."""
-        with open(transitions_file, 'r') as file:
-            reader = csv.reader(file)
-            for row in reader:
-                if len(row) < 5:
-                    continue
-                current_state, read_symbol, next_state, write_symbol, direction = row
-                key = (current_state, read_symbol)
-                if key not in self.transitions:
-                    self.transitions[key] = []
-                self.transitions[key].append((next_state, write_symbol, direction))
-
     def trace(self, input_string):
         """Trace the behavior of the NDTM."""
         configurations = [(self.start_state, input_string, 0)]  # (state, tape, head_position)
@@ -54,10 +41,13 @@ class NDTuringMachine:
         print("Rejected:", input_string)
         return False
 
-def load_machine_from_csv(file_path):
+def load_machine_from_csv_with_transitions(file_path):
+    """Load NDTM configuration and transitions from a single CSV file."""
     with open(file_path, 'r') as file:
         reader = csv.reader(file)
         lines = [line for line in reader]
+        
+        # Extract machine configuration
         name = lines[0][0]
         states = lines[1]
         sigma = lines[2]
@@ -65,16 +55,26 @@ def load_machine_from_csv(file_path):
         start_state = lines[4][0]
         accept_state = lines[5][0]
         reject_state = lines[6][0]
-        return NDTuringMachine(name, states, sigma, gamma, start_state, accept_state, reject_state)
+        
+        # Initialize the Turing machine
+        ndtm = NDTuringMachine(name, states, sigma, gamma, start_state, accept_state, reject_state)
+        
+        # Extract transitions (from line 8 onwards)
+        for row in lines[7:]:
+            if len(row) < 5:  # Skip invalid rows
+                continue
+            current_state, read_symbol, next_state, write_symbol, direction = row
+            key = (current_state, read_symbol)
+            if key not in ndtm.transitions:
+                ndtm.transitions[key] = []
+            ndtm.transitions[key].append((next_state, write_symbol, direction))
+        
+        return ndtm
 
 # Example usage:
-# Assuming CSV format as described and transition rules in "transitions.csv"
-csv_file = "ndtm_config.csv"
-transitions_file = "transitions.csv"
+csv_file_with_transitions = "a_plus_DTM.csv"
 
-ndtm = load_machine_from_csv(csv_file)
-ndtm.load_transitions(transitions_file)
+ndtm = load_machine_from_csv_with_transitions(csv_file_with_transitions)
 
-input_string = "110"
+input_string = "aaa"
 ndtm.trace(input_string)
-        
