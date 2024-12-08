@@ -10,7 +10,7 @@ class NDTuringMachineK:
         self.accept_state = accept_state
         self.reject_state = reject_state
         self.k = k # number of k tapes
-        self.transitions = {}  # Transition function (e.g., {('q1', '0'): [('q2', '1', 'R'), ...]})
+        self.transitions = {}  # Transition function 
 
     def trace(self, input_strings):
         """Trace the behavior of the k-tape NDTM."""
@@ -103,5 +103,5 @@ k = 2  # Number of tapes
 ndtm_k = load_k_tape_machine_from_csv(csv_file_with_k_tape_transitions, k)
 
 #input_strings = ["aaa","_"]  # Example of accepted
-input_strings = ["_","_"] # Example of rejected 
+input_strings = ["aaaaaaaaaaaaaaaaabaaaaa","_"] # Example of rejected 
 ndtm_k.trace(input_strings)
