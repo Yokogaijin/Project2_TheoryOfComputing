@@ -12,18 +12,36 @@ class NDTuringMachineK:
         self.k = k # number of k tapes
         self.transitions = {}  # Transition function 
 
-    def trace(self, input_strings):
+    def trace(self, input_strings, max_steps=1000):
         """Trace the behavior of the k-tape NDTM."""
+        
+        
         tapes = [list(input_string) for input_string in input_strings]
         head_positions = [0] * self.k
-        configurations = [(self.start_state, tapes, head_positions)]  # (state, tapes, head_positions)
+        configurations = [(self.start_state, tapes, head_positions, 0)]  # (state, tapes, head_positions)
+        
+        transition_count = 0  # Total number of transitions
+        max_depth = 0  # Max depth reached during the computation
+        found_accept = False
+        accept_depth = 0
+        
+        # Echo the machine's name and initial configuration
+        print(f"Machine: {self.name}")
+        print(f"Initial string: {input_strings}")
+        print("Depth of the tree: ", end="")
+        
+        # List to store the output in the required format
+        output = []
         
         while configurations:
             next_configurations = []
-            for state, tape, heads in configurations:
+            for state, tapes, heads in configurations:
+                # Store the current configuration as part of the output
+                output.append([["".join(tape)] for tape in tapes])
+                
                 if state == self.accept_state:
-                    print("Accepted:", tape)
-                    return True
+                    output.append([["".join(tape)] for tape in tapes] + [["qacc", "_", "L"]])
+                    return output
                 if state == self.reject_state:
                     continue
                 
@@ -57,8 +75,8 @@ class NDTuringMachineK:
 
             configurations = next_configurations
 
-        print("Rejected:", input_strings)
-        return False
+        output.append([["".join(tape[i]) for i in range(self.k)] for tape in tapes] + [["qrej", "_", "L"]])
+        return output
 
 def load_k_tape_machine_from_csv(file_path, k):
     """Load k-tape configuration and transitions from a single CSV file."""
@@ -77,6 +95,7 @@ def load_k_tape_machine_from_csv(file_path, k):
         
         # Initialize the k-tape Turing machine
         ndtm = NDTuringMachineK(name, states, sigma, gamma, start_state, accept_state, reject_state, k)
+
 
         # Extract transitions (from line 8 onwards)
         for row in lines[7:]:
@@ -100,8 +119,22 @@ def load_k_tape_machine_from_csv(file_path, k):
 csv_file_with_k_tape_transitions = "k_tape_a_plus_DTM.csv"
 k = 2  # Number of tapes
 
-ndtm_k = load_k_tape_machine_from_csv(csv_file_with_k_tape_transitions, k)
 
-#input_strings = ["aaa","_"]  # Example of accepted
-input_strings = ["aaaaaaaaaaaaaaaaabaaaaa","_"] # Example of rejected 
-ndtm_k.trace(input_strings)
+
+input_strings = ["aaa","_"]  # Example of accepted
+#input_strings = ["aaaaaaaaaaaaaaaaabaaaaa","_"] # Example of rejected 
+#ndtm_k.trace(input_strings)
+
+# Example usage for an palindromic:
+#csv_file_with_k_tape_transitions = "k_tape_palindromic_DTM.csv"
+#k = 2  # Number of tapes
+
+#input_strings = ["10101","_"]  # Example of accepted
+#input_strings = ["10100","_"] # Example of rejected 
+
+ndtm_k = load_k_tape_machine_from_csv(csv_file_with_k_tape_transitions, k)
+output = ndtm_k.trace(input_strings)
+
+# Print the output
+for step in output:
+    print(step)
