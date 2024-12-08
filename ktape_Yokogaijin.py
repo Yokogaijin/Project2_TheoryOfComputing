@@ -109,16 +109,16 @@ def load_k_tape_machine_from_csv(file_path):
         return ndtm
 
 # Example usage for an a^+ k-tape machine:
-csv_file_with_k_tape_transitions = "k_tape_a_plus_DTM.csv"
+#csv_file_with_k_tape_transitions = "k_tape_a_plus_DTM.csv"
 
 
-input_strings = ["aaa","_"]  # Example of accepted
+#input_strings = ["aaa","_"]  # Example of accepted
 #input_strings = ["aaaaaaaaaaaaaaaaabaaaaa","_"] # Example of rejected 
 
 # Example usage for an palindromic:
-#csv_file_with_k_tape_transitions = "k_tape_palindromic_DTM.csv"
+csv_file_with_k_tape_transitions = "k_tape_palindromic_DTM.csv"
 
-#input_strings = ["10101","_"]  # Example of accepted
+input_strings = ["10101","_"]  # Example of accepted
 #input_strings = ["10100","_"] # Example of rejected 
 
 ndtm_k = load_k_tape_machine_from_csv(csv_file_with_k_tape_transitions)
