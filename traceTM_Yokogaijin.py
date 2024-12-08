@@ -72,14 +72,15 @@ class NDTuringMachineK:
         print("Rejected:", input_strings)
         return False
 
-def load_k_tape_machine_from_csv(file_path, k):
+def load_k_tape_machine_from_csv(file_path):
     """Load k-tape configuration and transitions from a single CSV file."""
     with open(file_path, 'r') as file:
         reader = csv.reader(file)
         lines = [line for line in reader]
         
         # Extract machine configuration
-        name = lines[0][0]
+        name, k_str = lines[0][0], lines[0][1]  # Name and number of tapes (k)
+        k = int(k_str.strip(' "[]'))  # Strip unwanted characters and convert to int
         states = lines[1]
         sigma = lines[2]
         gamma = lines[3]
@@ -108,20 +109,18 @@ def load_k_tape_machine_from_csv(file_path, k):
         return ndtm
 
 # Example usage for an a^+ k-tape machine:
-#csv_file_with_k_tape_transitions = "k_tape_a_plus_DTM.csv"
-k = 2  # Number of tapes
+csv_file_with_k_tape_transitions = "k_tape_a_plus_DTM.csv"
+
 
 input_strings = ["aaa","_"]  # Example of accepted
 #input_strings = ["aaaaaaaaaaaaaaaaabaaaaa","_"] # Example of rejected 
-#ndtm_k.trace(input_strings)
 
 # Example usage for an palindromic:
-csv_file_with_k_tape_transitions = "k_tape_palindromic_DTM.csv"
-#k = 2  # Number of tapes
+#csv_file_with_k_tape_transitions = "k_tape_palindromic_DTM.csv"
 
-input_strings = ["10101","_"]  # Example of accepted
+#input_strings = ["10101","_"]  # Example of accepted
 #input_strings = ["10100","_"] # Example of rejected 
 
-ndtm_k = load_k_tape_machine_from_csv(csv_file_with_k_tape_transitions, k)
+ndtm_k = load_k_tape_machine_from_csv(csv_file_with_k_tape_transitions)
 output = ndtm_k.trace(input_strings)
 

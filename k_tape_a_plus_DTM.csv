@@ -1,4 +1,4 @@
-Two_Tape_a_plus
+["Two_Tape_a_plus", 2]
 q0,q1,q2,q_accept,q_reject
 a
 a,_
