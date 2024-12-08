@@ -25,6 +25,14 @@ class NDTuringMachineK:
         while configurations:
             next_configurations = []
             for state, tape, heads in configurations:
+                # Print the current step and its steps
+                print(f"Step: {state}")
+                for i in range(self.k):
+                    # Print the tape with space before the head's character
+                    tape_str = ''.join(
+                    [f" {char}" if idx == heads[i] else char for idx, char in enumerate(tape[i])])
+                print(f"Tape {i + 1}: {tape_str}")    
+                            
                 if state == self.accept_state:
                     print("Accepted:", tape)
                     return True
