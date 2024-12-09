@@ -1,10 +1,11 @@
 ["Two_Tape_1_plus", 2]
-q0,q1,q2,qAccept,qReject
+qCopy,qGoing,qAccept,qReject
 1
 1,_
-q0
+qCopy
 qAccept
 qReject
-q0,a,_,q1,_,a,R,R
-q1,a,_,q1,_,a,R,R
-q1,_,_,qAccept,_,_,S,S
+qCopy,_,_,qReject,_,_,S,S
+qCopy,1,_,qGoing,1,1,R,R
+qGoing,1,_,qGoing,1,1,R,R
+qGoing,_,_,qAccept,_,_,S,S

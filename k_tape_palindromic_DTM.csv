@@ -1,16 +1,17 @@
 ["Fast binary palindrome", 2]
 qCopy,qReturn,qTest,qAccept
 0,1
-0,1,_
+0,1,$,_
 qCopy
 qAccept
 qReject
+qCopy,$,_,qCopy,$,$,R,R
 qCopy,0,_,qCopy,0,0,R,R
 qCopy,1,_,qCopy,1,1,R,R
 qCopy,_,_,qReturn,_,_,S,L
 qReturn,_,0,qReturn,_,0,S,L
-qReturn,_,1,qTest,_,1,S,L
-qReturn,_,_,qTest,_,_,L,R
+qReturn,_,1,qReturn,_,1,S,L
+qReturn,_,$,qTest,_,$,L,R
 qTest,0,0,qTest,0,0,L,R
 qTest,1,1,qTest,1,1,L,R
-qTest,_,_,qAccept,_,_,S,S
+qTest,$,_,qAccept,$,_,S,S

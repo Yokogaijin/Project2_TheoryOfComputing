@@ -18,7 +18,8 @@ class KTapeTuringMachine:
         # Load input string onto the first tape
         self.tapes[0] = list(input_string) + ["_"]
         self.head_positions = [0] * self.num_tapes
-
+        
+        print(" ")
         print(f"Running Turing Machine: {self.title}")
         while self.current_state != self.accept_state and self.current_state != self.reject_state:
             print(f"\nState: {self.current_state}")
@@ -64,7 +65,7 @@ class KTapeTuringMachine:
         elif self.current_state == self.reject_state:
             print("Input rejected!")
         else:
-            print("Machine halted unexpectedly.")
+            print("Machine halted unexpectedly. The string might not be in the language!")
 
 def parse_csv_to_turing_machine(filename):
     with open(filename, newline='') as csvfile:
@@ -83,7 +84,12 @@ def parse_csv_to_turing_machine(filename):
     reject_state = None
 
     for line in lines[1:]:
-        if len(line) == 1:  # A single element, indicating a state declaration
+        # Skip empty or incomplete lines
+        if not line or len(line) == 0:
+            continue
+        
+        # Check for standalone state declarations
+        if len(line) == 1:
             state = line[0].strip()
             if state.startswith("qAccept"):
                 accept_state = state
@@ -92,8 +98,7 @@ def parse_csv_to_turing_machine(filename):
             elif not start_state:
                 start_state = state
             states.add(state)
-        elif len(line) >= 2 + 3 * num_tapes:  # Ensure enough columns for transitions
-            # Transition line
+        elif len(line) >= 2 + 3 * num_tapes:  # Transition line
             current_state = line[0].strip()
             read_symbols = tuple(symbol.strip() for symbol in line[1:1 + num_tapes])
             new_state = line[1 + num_tapes].strip()
@@ -105,11 +110,11 @@ def parse_csv_to_turing_machine(filename):
 
 # Example usage of palindromic:
 #filename = "k_tape_palindromic_DTM.csv"
-#input_string = "_10101"  # Example input, empty space in front required
+#input_string = "$10100"  # Example input, dollar sign required in front to know where beginning of tape is.
 
 # Example usage of 1^+:
-filename = "k_tape_palindromic_DTM.csv"
-input_string = "aa"  # Example input, empty space in front required
+filename = "k_tape_1_plus_DTM.csv"
+input_string = "1"  # Example input
 
 machine = parse_csv_to_turing_machine(filename)
 machine.run(input_string)
