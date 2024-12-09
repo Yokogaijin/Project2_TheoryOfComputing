@@ -1,0 +1,10 @@
+["Two_Tape_1_plus", 2]
+q0,q1,q2,qAccept,qReject
+1
+1,_
+q0
+qAccept
+qReject
+q0,a,_,q1,_,a,R,R
+q1,a,_,q1,_,a,R,R
+q1,_,_,qAccept,_,_,S,S

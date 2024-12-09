@@ -1,126 +1,115 @@
 import csv
+from collections import defaultdict
 
-class NDTuringMachineK:
-    def __init__(self, name, states, sigma, gamma, start_state, accept_state, reject_state, k):
-        self.name = name
+class KTapeTuringMachine:
+    def __init__(self, title, num_tapes, states, transitions, start_state, accept_state, reject_state):
+        self.title = title
+        self.num_tapes = num_tapes
         self.states = states
-        self.sigma = sigma
-        self.gamma = gamma
+        self.transitions = transitions
         self.start_state = start_state
         self.accept_state = accept_state
         self.reject_state = reject_state
-        self.k = k # number of k tapes
-        self.transitions = {}  # Transition function 
+        self.tapes = [["_"] for _ in range(num_tapes)]  # Initialize tapes with blank symbols
+        self.head_positions = [0] * num_tapes  # Initialize head positions
+        self.current_state = start_state
 
-    def trace(self, input_strings):
-        """Trace the behavior of the k-tape NDTM."""
-        tapes = [list(input_string) for input_string in input_strings]
-        head_positions = [0] * self.k
-        configurations = [(self.start_state, tapes, head_positions)]  # (state, tapes, head_positions)
+    def run(self, input_string):
+        # Load input string onto the first tape
+        self.tapes[0] = list(input_string) + ["_"]
+        self.head_positions = [0] * self.num_tapes
+
+        print(f"Running Turing Machine: {self.title}")
+        while self.current_state != self.accept_state and self.current_state != self.reject_state:
+            print(f"\nState: {self.current_state}")
+            print(f"Head positions: {self.head_positions}")
+            for i, tape in enumerate(self.tapes):
+                tape_view = "".join(tape)
+                print(f"Tape {i+1}: {tape_view} (Head at {self.head_positions[i]})")
+
+            # Get current symbols under each tape head
+            current_symbols = tuple(
+                self.tapes[i][self.head_positions[i]] if self.head_positions[i] < len(self.tapes[i]) else "_"
+                for i in range(self.num_tapes)
+            )
+            print(f"Current symbols: {current_symbols}")
+
+            # Look up the transition
+            key = (self.current_state, *current_symbols)
+            if key not in self.transitions:
+                print(f"No transition found for {key}. Halting.")
+                break
+
+            new_state, writes, moves = self.transitions[key]
+            print(f"Transition: {key} -> {new_state}, writes: {writes}, moves: {moves}")
+
+            # Write symbols and move tape heads
+            for i in range(self.num_tapes):
+                # Write the symbol
+                if self.head_positions[i] < len(self.tapes[i]):
+                    self.tapes[i][self.head_positions[i]] = writes[i]
+                else:
+                    self.tapes[i].append(writes[i])
+
+                # Move the head
+                if moves[i] == "R":
+                    self.head_positions[i] += 1
+                elif moves[i] == "L":
+                    self.head_positions[i] = max(0, self.head_positions[i] - 1)
+
+            self.current_state = new_state
+
+        if self.current_state == self.accept_state:
+            print("Input accepted!")
+        elif self.current_state == self.reject_state:
+            print("Input rejected!")
+        else:
+            print("Machine halted unexpectedly.")
+
+def parse_csv_to_turing_machine(filename):
+    with open(filename, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        lines = list(reader)
+
+    # Parse title and number of tapes
+    title, num_tapes = lines[0][0].strip('"[]'), int(lines[0][1].strip('"[]'))  # Example: ["Fast binary palindrome", 2] 
+    num_tapes = int(num_tapes)
+
+    # Parse states and transitions
+    states = set()
+    transitions = defaultdict(tuple)
+    start_state = None
+    accept_state = None
+    reject_state = None
+
+    for line in lines[1:]:
+        if len(line) == 1:  # A single element, indicating a state declaration
+            state = line[0].strip()
+            if state.startswith("qAccept"):
+                accept_state = state
+            elif state.startswith("qReject"):
+                reject_state = state
+            elif not start_state:
+                start_state = state
+            states.add(state)
+        elif len(line) >= 2 + 3 * num_tapes:  # Ensure enough columns for transitions
+            # Transition line
+            current_state = line[0].strip()
+            read_symbols = tuple(symbol.strip() for symbol in line[1:1 + num_tapes])
+            new_state = line[1 + num_tapes].strip()
+            write_symbols = tuple(symbol.strip() for symbol in line[2 + num_tapes:2 + 2 * num_tapes])
+            moves = tuple(symbol.strip() for symbol in line[2 + 2 * num_tapes:])
+            transitions[(current_state, *read_symbols)] = (new_state, write_symbols, moves)
         
-        # Echo the machine's name and initial configuration
-        print(f"Machine: {self.name}")
-        print(f"Initial string: {input_strings}")
-        
-        while configurations:
-            next_configurations = []
-            for state, tape, heads in configurations:
-                # Print the current step and its steps
-                print(f"Step: {state}")
-                for i in range(self.k):
-                    # Print the tape with space before the head's character
-                    tape_str = ''.join(
-                    [f" {char}" if idx == heads[i] else char for idx, char in enumerate(tape[i])])
-                print(f"Tape {i + 1}: {tape_str}")    
-                            
-                if state == self.accept_state:
-                    print("Accepted:", tape)
-                    return True
-                if state == self.reject_state:
-                    continue
-                
-                # Get the symbol under the head, or use '_' if beyond the tape
-                read_symbols = [tapes[i][heads[i]] if heads[i] < len(tapes[i]) else '_' for i in range(self.k)]
-                key = (state, tuple(read_symbols))
-                
-                # Check for valid transitions
-                if key in self.transitions:
-                    for transition in self.transitions[key]:
-                        next_state, write_symbols, directions = transition
-                        new_tapes = [tape[:] for tape in tapes]
-                        new_heads = heads[:]
+    return KTapeTuringMachine(title, num_tapes, states, transitions, start_state, accept_state, reject_state)
 
-                        # Update tapes and head positions
-                        for i in range(self.k):
-                            # Write symbol
-                            if new_heads[i] < len(new_tapes[i]):
-                                new_tapes[i][new_heads[i]] = write_symbols[i]
-                            elif new_heads[i] == len(new_tapes[i]):
-                                new_tapes[i].append(write_symbols[i])  # Append when head is at the end
-                            
-                            # Move head
-                            if directions[i] == 'R':
-                                new_heads[i] += 1
-                            elif directions[i] == 'L':
-                                new_heads[i] = max(0, new_heads[i] - 1)
+# Example usage of palindromic:
+#filename = "k_tape_palindromic_DTM.csv"
+#input_string = "_10101"  # Example input, empty space in front required
 
-                        # Add new configuration
-                        next_configurations.append((next_state, new_tapes, new_heads))
+# Example usage of 1^+:
+filename = "k_tape_palindromic_DTM.csv"
+input_string = "aa"  # Example input, empty space in front required
 
-            configurations = next_configurations
-
-        print("Rejected:", input_strings)
-        return False
-
-def load_k_tape_machine_from_csv(file_path):
-    """Load k-tape configuration and transitions from a single CSV file."""
-    with open(file_path, 'r') as file:
-        reader = csv.reader(file)
-        lines = [line for line in reader]
-        
-        # Extract machine configuration
-        name, k_str = lines[0][0], lines[0][1]  # Name and number of tapes (k)
-        k = int(k_str.strip(' "[]'))  # Strip unwanted characters and convert to int
-        states = lines[1]
-        sigma = lines[2]
-        gamma = lines[3]
-        start_state = lines[4][0]
-        accept_state = lines[5][0]
-        reject_state = lines[6][0]
-        
-        # Initialize the k-tape Turing machine
-        ndtm = NDTuringMachineK(name, states, sigma, gamma, start_state, accept_state, reject_state, k)
-
-        # Extract transitions (from line 8 onwards)
-        for row in lines[7:]:
-            if len(row) < 2 + 3 * k:  # Skip invalid rows
-                continue
-            current_state = row[0]
-            read_symbols = tuple(row[1:k + 1])
-            next_state = row[k + 1]
-            write_symbols = tuple(row[k + 2:2 * k + 2])
-            directions = row[2 * k + 2:3 * k + 2]
-
-            key = (current_state, read_symbols)
-            if key not in ndtm.transitions:
-                ndtm.transitions[key] = []
-            ndtm.transitions[key].append((next_state, write_symbols, directions))
-
-        return ndtm
-
-# Example usage for an a^+ k-tape machine:
-#csv_file_with_k_tape_transitions = "k_tape_a_plus_DTM.csv"
-
-
-#input_strings = ["aaa","_"]  # Example of accepted
-#input_strings = ["aaaaaaaaaaaaaaaaabaaaaa","_"] # Example of rejected 
-
-# Example usage for an palindromic:
-csv_file_with_k_tape_transitions = "k_tape_palindromic_DTM.csv"
-
-input_strings = ["10101","_"]  # Example of accepted
-#input_strings = ["10100","_"] # Example of rejected 
-
-ndtm_k = load_k_tape_machine_from_csv(csv_file_with_k_tape_transitions)
-output = ndtm_k.trace(input_strings)
-
+machine = parse_csv_to_turing_machine(filename)
+machine.run(input_string)

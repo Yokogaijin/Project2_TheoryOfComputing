@@ -7,9 +7,9 @@ qAccept
 qReject
 qCopy,0,_,qCopy,0,0,R,R
 qCopy,1,_,qCopy,1,1,R,R
-qCopy,_,_,qReturn,_,_,S,R
+qCopy,_,_,qReturn,_,_,S,L
 qReturn,_,0,qReturn,_,0,S,L
-qReturn,_,1,qReturn,_,1,S,L
+qReturn,_,1,qTest,_,1,S,L
 qReturn,_,_,qTest,_,_,L,R
 qTest,0,0,qTest,0,0,L,R
 qTest,1,1,qTest,1,1,L,R
