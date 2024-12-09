@@ -65,7 +65,7 @@ class KTapeTuringMachine:
         elif self.current_state == self.reject_state:
             print("Input rejected!")
         else:
-            print("Machine halted unexpectedly. The string might not be in the language!")
+            print("Machine halted unexpectedly. The string is not be in the language! :(")
 
 def parse_csv_to_turing_machine(filename):
     with open(filename, newline='') as csvfile:
@@ -82,6 +82,10 @@ def parse_csv_to_turing_machine(filename):
     start_state = None
     accept_state = None
     reject_state = None
+    
+    # This is where you explicitly set the start state to line 5 (line index 4)
+    if len(lines) > 4:
+        start_state = lines[4][0].strip()  # Set start state to the state on line 5
 
     for line in lines[1:]:
         # Skip empty or incomplete lines
@@ -108,13 +112,15 @@ def parse_csv_to_turing_machine(filename):
         
     return KTapeTuringMachine(title, num_tapes, states, transitions, start_state, accept_state, reject_state)
 
-# Example usage of palindromic:
-#filename = "k_tape_palindromic_DTM.csv"
-#input_string = "$10100"  # Example input, dollar sign required in front to know where beginning of tape is.
+# Example usage of palindromic: Has 2 tape problem solver
+filename = "k_tape_palindromic_DTM.csv"
+input_string = "$10101"  # Example input that accepts, dollar sign required in front to know where beginning of tape is.
+#input_string = "$10100"  # Example input that rejects,
 
-# Example usage of 1^+:
-filename = "k_tape_1_plus_DTM.csv"
-input_string = "1"  # Example input
+# Example usage of 1^+: Shows that the k tape machine works with only 1 tape
+#filename = "k_tape_0_plus_DTM.csv"
+#input_string = "00"  # Example input that accepts
+#input_string = "0011"  # Example input that rejects
 
 machine = parse_csv_to_turing_machine(filename)
 machine.run(input_string)
